@@ -1,5 +1,4 @@
-import wpdb from './wpdb.js'
-const db = wpdb.db
+import db from './wpdb.js'
 const columnsSettings = [
     {
         data: "api_slotitem_id",

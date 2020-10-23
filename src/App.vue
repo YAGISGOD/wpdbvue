@@ -1,44 +1,11 @@
 <template>
   <div id="app">
-    <!-- <div class="container-fluid">
-      <div class="row">
-        <div id="page1" class="pages">
-          <table
-            id="tbl1"
-            class="table table-sm table-bordered nowrap"
-            width="100%"
-          >
-            <thead class="bg-primary text-light">
-              <tr>
-                <th>ID</th>
-                <th>装備種別</th>
-                <th>装備名</th>
-                <th>改修Lv</th>
-                <th>目標Lv</th>
-                <th>アイコン</th>
-                <th>火力</th>
-                <th>雷装</th>
-                <th>対空</th>
-                <th>装甲</th>
-                <th>対潜</th>
-                <th>回避</th>
-                <th>索敵</th>
-                <th>命中</th>
-                <th>爆装</th>
-                <th>射程</th>
-                <th>行動範囲</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-
-    </div> -->
     <div class="container-fluid">
       <div class="row">
         <button
           type="button"
+          v-on:click="activetab = 1"
+          v-bind:class="[activetab === 1 ? 'active' : '']"
           id="dataBtn"
           class="toggleBtn btn btn-outline-primary col-md-6 col-xl-1"
         >
@@ -46,6 +13,8 @@
         </button>
         <button
           type="button"
+          v-on:click="activetab = 2"
+          v-bind:class="[activetab === 2 ? 'active' : '']"
           id="inputBtn"
           class="toggleBtn btn btn-outline-primary col-md-6 col-xl-1"
         >
@@ -53,6 +22,8 @@
         </button>
         <button
           type="button"
+          v-on:click="activetab = 3"
+          v-bind:class="[activetab === 3 ? 'active' : '']"
           id="memoBtn"
           class="toggleBtn btn btn-outline-primary col-md-6 col-xl-1"
         >
@@ -101,7 +72,47 @@
                 </button>
               </div>
             </div>
-            <div id="filter-body"></div>
+            <div id="filter-body">
+              <div class="row col-12">
+                <button
+                  type="button"
+                  id="LcateBtn"
+                  class="btn btn-outline-primary cateToggleBtn col-6"
+                >
+                  大カテゴリ(未実装)
+                </button>
+                <button
+                  type="button"
+                  id="ScateBtn"
+                  class="btn btn-outline-primary cateToggleBtn col-6"
+                >
+                  小カテゴリ
+                </button>
+              </div>
+              <div id="catePage1" class="row col-12 catePages">
+                <div class="row col-12" v-for="index in newWpType" :key="index">
+                   <div
+                    class="dropdown-item col-md-6 col-xl-3"
+                    style="vertical-align: middle !important"
+                    v-for="value in index"
+                    :key="value"
+                  >
+                    <div class="row col-12">
+                      <div class="row col-12">
+                        <input
+                          type="checkbox"
+                          name="wpTypeLCheck"
+                          :value="value.wpTypeCateName"
+                          checked="checked"
+                          class="col-2"
+                        />
+                        <div class="col-8">{{ value.wpTypeCateName }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div class="modal-footer">
               <div class="row"></div>
               <button
@@ -116,7 +127,7 @@
         </div>
       </div>
 
-      <div id="page1" class="pages">
+      <div id="page1" class="pages tabcontent" v-show="activetab === 1">
         <table
           id="tbl1"
           class="table table-sm table-bordered nowrap"
@@ -124,29 +135,29 @@
         >
           <thead class="bg-primary text-light">
             <tr>
-            <th>ID</th>
-            <th>装備種別</th>
-            <th>装備名</th>
-            <th>改修Lv</th>
-            <th>目標Lv</th>
-            <th>アイコン</th>
-            <th>火力</th>
-            <th>雷装</th>
-            <th>対空</th>
-            <th>装甲</th>
-            <th>対潜</th>
-            <th>回避</th>
-            <th>索敵</th>
-            <th>命中</th>
-            <th>爆装</th>
-            <th>射程</th>
-            <th>行動範囲</th>
+              <th>ID</th>
+              <th>装備種別</th>
+              <th>装備名</th>
+              <th>改修Lv</th>
+              <th>目標Lv</th>
+              <th>アイコン</th>
+              <th>火力</th>
+              <th>雷装</th>
+              <th>対空</th>
+              <th>装甲</th>
+              <th>対潜</th>
+              <th>回避</th>
+              <th>索敵</th>
+              <th>命中</th>
+              <th>爆装</th>
+              <th>射程</th>
+              <th>行動範囲</th>
             </tr>
           </thead>
           <tbody></tbody>
         </table>
       </div>
-      <div id="page2" class="pages" style="display: none">
+      <div id="page2" class="pages tabcontent" v-show="activetab === 2">
         <hr />
         艦隊分析ページの装備用コードを下のテキストフィールドに入力して反映を押す<br />
         <button type="button" id="putBtn" class="btn btn-outline-primary">
@@ -154,7 +165,7 @@
         ><br /><br />
         <textarea name="data" id="jsonData" cols="100" rows="20"></textarea>
       </div>
-      <div id="page3" class="pages" style="display: none">
+      <div id="page3" class="pages tabcontent" v-show="activetab === 3">
         <p>
           ・改修可能装備の絞り込み<br />
           ・ステータス絞り込み（機能だけは実装済み）<br />
@@ -164,11 +175,11 @@
       </div>
     </div>
   </div>
-  <!-- <img alt="Vue logo" src="./assets/logo.png"> -->
-  <!-- <HelloWorld msg="Welcome to Your Vue.js App"/> -->
 </template>
 
 <script>
+import wpTypeL from "./wpTypeL.js"; // eslint-disable-line
+
 // import HelloWorld from './components/HelloWorld.vue'
 
 // export default {
@@ -177,19 +188,35 @@
 //     HelloWorld
 //   }
 // }
+
+var newWpType = a();
+
+function a() {
+  var newTmpWpType = [];
+  var tmpType = [];
+  for (let i = 0; i < wpTypeL.length; i++) {
+    tmpType.push(wpTypeL[i]);
+    var tmp = i;
+    if ((tmp + 1) % 4 == 0 || i == wpTypeL.length - 1) {
+      newTmpWpType.push(tmpType);
+       tmpType = [];
+    }
+  }
+  return newTmpWpType;
+}
+
+export default {
+  data() {
+    return {
+      activetab: 1,
+      newWpType,
+    };
+  },
+};
 </script>
 
 
 <style>
-/* #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-} */
-
 html {
   font-size: 13px;
 }
