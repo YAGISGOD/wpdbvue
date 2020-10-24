@@ -115,23 +115,32 @@
               </div>
             </div>
             <div class="modal-footer">
-              <div class="row col-12">
+              <div
+                class="row col-12 h-100"
+                v-for="(value, index) in sliderPro"
+                :key="index"
+              >
+                <span class="col-2 text-nowrap">{{ value.name }}</span>
+                <span class="col-1 text-right text-nowrap">{{ sValue[index][0] }} Min</span>
                 <vue-slider
-                  class="col-12"
+                  class="col-6"
                   ref="slider"
-                  v-model="sValue"
-                  :min="0"
-                  :max="50"
+                  v-model="sValue[index]"
+                  :min="value.min"
+                  :max="value.max"
                   @drag-end="sliderChenged(sValue)"
+                  :tooltip="'none'"
                 ></vue-slider>
+                <span class="col-2 text-nowrap">{{ sValue[index][1] }} Max</span>
               </div>
               <div class="row"></div>
               <button
                 type="button"
                 id="valReset"
                 class="btn btn-outline-primary"
+                v-on:click="sValue = resetSValue()"
               >
-                数値リセット
+                スライダーリセット
               </button>
             </div>
           </div>
@@ -201,8 +210,7 @@ import wpTypeL from "./wpTypeL.js"; // eslint-disable-line
 //
 import VueSlider from "vue-slider-component";
 import "vue-slider-component/theme/default.css";
-
-import numberRangeRegexp from "./numberRangeRegexp.js";
+import db from "./wpdb.js";
 
 // テストデータ
 import testData from "./test.js"; // eslint-disable-line
@@ -222,6 +230,44 @@ function newWpTypeGen() {
   }
   return newTmpWpType;
 }
+
+function dbMax(key) {
+  return Math.max.apply(
+    null,
+    db.map(function (o) {
+      return o[key];
+    })
+  );
+}
+function dbMin(key) {
+  return Math.min.apply(
+    null,
+    db.map(function (o) {
+      return o[key];
+    })
+  );
+}
+var sliderPro = [
+  { col: 3, name: "改修Lv", min: 0, max: 10 },
+  { col: 6, name: "火力", min: dbMin("fire"), max: dbMax("fire") },
+  { col: 7, name: "雷装", min: dbMin("torpedo"), max: dbMax("torpedo") },
+  { col: 8, name: "対空", min: dbMin("aa"), max: dbMax("aa") },
+  { col: 9, name: "装甲", min: dbMin("armor"), max: dbMax("armor") },
+  { col: 10, name: "対潜", min: dbMin("asw"), max: dbMax("asw") },
+  { col: 11, name: "回避", min: dbMin("evasion"), max: dbMax("evasion") },
+  { col: 12, name: "索敵", min: dbMin("los"), max: dbMax("los") },
+  { col: 13, name: "命中", min: dbMin("accuracy"), max: dbMax("accuracy") },
+  { col: 14, name: "爆装", min: dbMin("bombing"), max: dbMax("bombing") },
+];
+
+function newsValueGen() {
+  var sValueTmp = [];
+  for (var i = 0; i < sliderPro.length; i++) {
+    sValueTmp[i] = [sliderPro[i].min, sliderPro[i].max];
+  }
+  return sValueTmp;
+}
+var newsValue = newsValueGen();
 
 var ths = [
   "ID",
@@ -254,13 +300,13 @@ export default {
       newWpType,
       selectChecked: wpTypeL.map((obj) => obj.wpTypeCateName),
       ths,
-      sValue: [0, 30],
+      sValue: newsValue,
+      sliderPro,
     };
   },
   components: {
     vueSlider: VueSlider,
   },
-  // props: ['sdef'],
   mounted: function () {
     const columnsSettings = columnsSet.columnsSettings;
 
@@ -285,25 +331,70 @@ export default {
       var searchType = "^" + selectChecked.join("$|^");
       this.dataTable.columns(1).search(searchType, true).draw();
     },
+    resetSValue() {
+      return newsValueGen()
+    },
     sliderChenged(sValue) {
-      this.dataTable
-        .columns(6)
-        .search(
-          "^" + numberRangeRegexp(sValue[0], sValue[1], false) + "$",
-          true
-        )
-        .draw();
+      $.fn.dataTable.ext.search = [];
+
+      // ループでで意義を入れようとすると最後しか有効にならない（謎
+      // for (var i = 0; i < sValue.length; i++) {
+      //   var min = parseInt(sValue[i][0], 10);
+      //   var max = parseInt(sValue[i][1], 10);
+      //   var col = parseInt(sliderPro[i].col, 10);
+      //   tmpary.push(function (settings, data) {
+      //     if (
+      //       parseInt(data[col], 10) >= min &&
+      //       max >= parseInt(data[col], 10)
+      //     ) {
+      //       // 行の値と一致するか判定
+      //       return true;
+      //     }
+      //     return false;
+      //   });
+      //    console.log($.fn.dataTable.ext.search.length);
+      // }
+      // 直接なら複数の検索条件を設定出来る
+      // $.fn.dataTable.ext.search.push(function (settings, data) {
+      //   if (
+      //     parseInt(data[6], 10) >= sValue[1][0] &&
+      //     sValue[1][1] >= parseInt(data[6], 10)
+      //   ) {
+      //     // 行の値と一致するか判定
+      //     return true;
+      //   }
+      //   return false;
+      // });
+      // $.fn.dataTable.ext.search.push(function (settings, data) {
+      //   if (
+      //     parseInt(data[8], 10) >= sValue[3][0] &&
+      //     sValue[3][1] >= parseInt(data[8], 10)
+      //   ) {
+      //     // 行の値と一致するか判定
+      //     return true;
+      //   }
+      //   return false;
+      // });
+
+      $.fn.dataTable.ext.search.push(function (settings, data) {
+        for (var i = 0; i < sValue.length; i++) {
+          if (
+            sValue[i][0] > parseInt(data[sliderPro[i].col], 10) ||
+            parseInt(data[sliderPro[i].col], 10) > sValue[i][1]
+          ) {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      // console.log($.fn.dataTable.ext.search.length);
+      /* eslint-disable */
+      /* eslint-enable */
+      this.dataTable.draw();
     },
   },
 };
-// //スライダー操作時の挙動
-// $('.modal-footer').click(function () {
-//     for (var i = 0; i < sliderPro.length; i++) {
-//         max = parseInt(sliders[i]._state.value[1]);
-//         min = parseInt(sliders[i]._state.value[0]);
-//         dt.columns(sliderPro[i].col).search('^' + numberRangeRegexp(min, max, false) + '$', true).draw();
-//     }
-// });
 </script>
 
 
@@ -361,5 +452,14 @@ table.dataTable thead .sorting_desc {
   background-image: url(https://datatables.net/media/images/sort_desc.png);
   background-repeat: no-repeat;
   background-position: center right;
+}
+.modal-footer>* {
+    font-size: 15px;
+}
+.vue-slider-dot-tooltip-inner {
+    font-size: 10px;
+    white-space: nowrap;
+    padding: 0px 7px;
+    min-width: 20px;
 }
 </style>
