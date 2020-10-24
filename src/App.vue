@@ -6,7 +6,6 @@
           type="button"
           v-on:click="activetab = 1"
           v-bind:class="[activetab === 1 ? 'active' : '']"
-          id="dataBtn"
           class="toggleBtn btn btn-outline-primary col-md-6 col-xl-1"
         >
           データ表示
@@ -15,7 +14,6 @@
           type="button"
           v-on:click="activetab = 2"
           v-bind:class="[activetab === 2 ? 'active' : '']"
-          id="inputBtn"
           class="toggleBtn btn btn-outline-primary col-md-6 col-xl-1"
         >
           データ入力
@@ -24,7 +22,6 @@
           type="button"
           v-on:click="activetab = 3"
           v-bind:class="[activetab === 3 ? 'active' : '']"
-          id="memoBtn"
           class="toggleBtn btn btn-outline-primary col-md-6 col-xl-1"
         >
           メモ
@@ -32,18 +29,13 @@
         <div class="col-md-6 col-xl-1"></div>
         <button
           type="button"
-          id="modalBtn"
           class="btn btn btn-success col-md-6 col-xl-1"
           data-toggle="modal"
           data-target="#filter-content"
         >
           絞り込み
         </button>
-        <button
-          type="button"
-          id="testBtn"
-          class="btn btn-warning col-xl-2 col-md-6 ml-auto"
-        >
+        <button type="button" class="btn btn-warning col-xl-2 col-md-6 ml-auto">
           テストデータ入力
         </button>
       </div>
@@ -58,14 +50,20 @@
                 </li>
                 <button
                   type="button"
-                  id="AllCheck"
+                  v-on:click="
+                    selectChecked = wpTypeL.map((obj) => obj.wpTypeCateName);
+                    onChangeInput(selectChecked);
+                  "
                   class="btn btn-outline-primary col-12 col-xl-2 false"
                 >
                   全チェック
                 </button>
                 <button
                   type="button"
-                  id="AllNoCheck"
+                  v-on:click="
+                    selectChecked = [];
+                    onChangeInput(selectChecked);
+                  "
                   class="btn btn-outline-primary col-12 col-xl-2"
                 >
                   チェックを外す
@@ -76,37 +74,40 @@
               <div class="row col-12">
                 <button
                   type="button"
-                  id="LcateBtn"
                   class="btn btn-outline-primary cateToggleBtn col-6"
                 >
                   大カテゴリ(未実装)
                 </button>
                 <button
                   type="button"
-                  id="ScateBtn"
                   class="btn btn-outline-primary cateToggleBtn col-6"
                 >
                   小カテゴリ
                 </button>
               </div>
               <div id="catePage1" class="row col-12 catePages">
-                <div class="row col-12" v-for="index in newWpType" :key="index">
-                   <div
+                <div
+                  class="row col-12"
+                  v-for="(value, index) in newWpType"
+                  :key="index"
+                >
+                  <div
                     class="dropdown-item col-md-6 col-xl-3"
                     style="vertical-align: middle !important"
-                    v-for="value in index"
-                    :key="value"
+                    v-for="(nestValue, nestIndex) in value"
+                    :key="nestIndex"
                   >
                     <div class="row col-12">
                       <div class="row col-12">
                         <input
                           type="checkbox"
                           name="wpTypeLCheck"
-                          :value="value.wpTypeCateName"
-                          checked="checked"
+                          :value="nestValue.wpTypeCateName"
                           class="col-2"
+                          v-model="selectChecked"
+                          @change="onChangeInput(selectChecked)"
                         />
-                        <div class="col-8">{{ value.wpTypeCateName }}</div>
+                        <div class="col-8">{{ nestValue.wpTypeCateName }}</div>
                       </div>
                     </div>
                   </div>
@@ -114,6 +115,16 @@
               </div>
             </div>
             <div class="modal-footer">
+              <div class="row col-12">
+                <vue-slider
+                  class="col-12"
+                  ref="slider"
+                  v-model="sValue"
+                  :min="0"
+                  :max="50"
+                  @drag-end="sliderChenged(sValue)"
+                ></vue-slider>
+              </div>
               <div class="row"></div>
               <button
                 type="button"
@@ -135,23 +146,7 @@
         >
           <thead class="bg-primary text-light">
             <tr>
-              <th>ID</th>
-              <th>装備種別</th>
-              <th>装備名</th>
-              <th>改修Lv</th>
-              <th>目標Lv</th>
-              <th>アイコン</th>
-              <th>火力</th>
-              <th>雷装</th>
-              <th>対空</th>
-              <th>装甲</th>
-              <th>対潜</th>
-              <th>回避</th>
-              <th>索敵</th>
-              <th>命中</th>
-              <th>爆装</th>
-              <th>射程</th>
-              <th>行動範囲</th>
+              <th v-for="value in ths" :key="value">{{ value }}</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -167,10 +162,16 @@
       </div>
       <div id="page3" class="pages tabcontent" v-show="activetab === 3">
         <p>
-          ・改修可能装備の絞り込み<br />
-          ・ステータス絞り込み（機能だけは実装済み）<br />
+          ・改修可能装備の絞り込み(Veuでは未実装)<br />
+          ・ステータス絞り込み（Veuでは未実装）<br />
+
+          ・（詳細表示フィルタ）<br />
+          ・改修値適用<br />
+          与ダメージ（デフォルトは砲撃戦 選択[雷撃戦 夜戦 対潜攻撃]）<br />
+          ・最大補正値適用（装備シナジーを除き艦シナジー）<br />
+          ・艦載機の対空等意味のないものを外すフィルタ<br />
           ・改修目標入力（今はとりあえず列ごと非表示）<br />
-          ・データ保存（ここの実装がちょっと見えない）<br />
+          ・データ保存（AWS）<br />
         </p>
       </div>
     </div>
@@ -178,20 +179,37 @@
 </template>
 
 <script>
+// jQuery
+import $ from "jquery";
+window.$ = $;
+// bootstrap
+import "popper.js";
+import "bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
+// datatables
+import "datatables.net-bs4";
+import "datatables.net-select-bs4";
+import "datatables.net-responsive-bs4";
+import "datatables.net-buttons-bs4";
+import "datatables.net-bs4/css/dataTables.bootstrap4.min.css";
+import "datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css";
+import "datatables.net-select-bs4/css/select.bootstrap4.min.css";
+import "datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css";
+// モジュール
+import columnsSet from "./columnsSettings.js"; // eslint-disable-line
 import wpTypeL from "./wpTypeL.js"; // eslint-disable-line
+//
+import VueSlider from "vue-slider-component";
+import "vue-slider-component/theme/default.css";
 
-// import HelloWorld from './components/HelloWorld.vue'
+import numberRangeRegexp from "./numberRangeRegexp.js";
 
-// export default {
-//   name: 'App',
-//   components: {
-//     HelloWorld
-//   }
-// }
+// テストデータ
+import testData from "./test.js"; // eslint-disable-line
 
-var newWpType = a();
+var newWpType = newWpTypeGen();
 
-function a() {
+function newWpTypeGen() {
   var newTmpWpType = [];
   var tmpType = [];
   for (let i = 0; i < wpTypeL.length; i++) {
@@ -199,21 +217,95 @@ function a() {
     var tmp = i;
     if ((tmp + 1) % 4 == 0 || i == wpTypeL.length - 1) {
       newTmpWpType.push(tmpType);
-       tmpType = [];
+      tmpType = [];
     }
   }
   return newTmpWpType;
 }
 
+var ths = [
+  "ID",
+  "装備種別",
+  "装備名",
+  "改修Lv",
+  "目標Lv",
+  "アイコン",
+  "火力",
+  "雷装",
+  "対空",
+  "装甲",
+  "対潜",
+  "回避",
+  "索敵",
+  "命中",
+  "爆装",
+  "射程",
+  "行動範囲",
+];
+
 export default {
   data() {
     return {
+      columnsSet,
+      show_contents: [],
+      dataTable: null,
       activetab: 1,
+      wpTypeL,
       newWpType,
+      selectChecked: wpTypeL.map((obj) => obj.wpTypeCateName),
+      ths,
+      sValue: [0, 30],
     };
   },
+  components: {
+    vueSlider: VueSlider,
+  },
+  // props: ['sdef'],
+  mounted: function () {
+    const columnsSettings = columnsSet.columnsSettings;
+
+    //datatables言語設定
+    $.extend($.fn.dataTable.defaults, {
+      language: {
+        url: "https://cdn.datatables.net/plug-ins/1.10.21/i18n/Japanese.json",
+      },
+    });
+
+    this.dataTable = window.$("#tbl1").DataTable({
+      data: JSON.parse(JSON.stringify(testData)),
+      responsive: true,
+      lengthChange: false,
+      displayLength: 50,
+      select: true,
+      columns: columnsSettings,
+    });
+  },
+  methods: {
+    onChangeInput(selectChecked) {
+      var searchType = "^" + selectChecked.join("$|^");
+      this.dataTable.columns(1).search(searchType, true).draw();
+    },
+    sliderChenged(sValue) {
+      this.dataTable
+        .columns(6)
+        .search(
+          "^" + numberRangeRegexp(sValue[0], sValue[1], false) + "$",
+          true
+        )
+        .draw();
+    },
+  },
 };
+// //スライダー操作時の挙動
+// $('.modal-footer').click(function () {
+//     for (var i = 0; i < sliderPro.length; i++) {
+//         max = parseInt(sliders[i]._state.value[1]);
+//         min = parseInt(sliders[i]._state.value[0]);
+//         dt.columns(sliderPro[i].col).search('^' + numberRangeRegexp(min, max, false) + '$', true).draw();
+//     }
+// });
 </script>
+
 
 
 <style>
