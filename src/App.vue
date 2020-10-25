@@ -332,50 +332,12 @@ export default {
       this.dataTable.columns(1).search(searchType, true).draw();
     },
     resetSValue() {
+      $.fn.dataTable.ext.search = [];
+      this.dataTable.draw();
       return newsValueGen()
     },
     sliderChenged(sValue) {
       $.fn.dataTable.ext.search = [];
-
-      // ループでで意義を入れようとすると最後しか有効にならない（謎
-      // for (var i = 0; i < sValue.length; i++) {
-      //   var min = parseInt(sValue[i][0], 10);
-      //   var max = parseInt(sValue[i][1], 10);
-      //   var col = parseInt(sliderPro[i].col, 10);
-      //   tmpary.push(function (settings, data) {
-      //     if (
-      //       parseInt(data[col], 10) >= min &&
-      //       max >= parseInt(data[col], 10)
-      //     ) {
-      //       // 行の値と一致するか判定
-      //       return true;
-      //     }
-      //     return false;
-      //   });
-      //    console.log($.fn.dataTable.ext.search.length);
-      // }
-      // 直接なら複数の検索条件を設定出来る
-      // $.fn.dataTable.ext.search.push(function (settings, data) {
-      //   if (
-      //     parseInt(data[6], 10) >= sValue[1][0] &&
-      //     sValue[1][1] >= parseInt(data[6], 10)
-      //   ) {
-      //     // 行の値と一致するか判定
-      //     return true;
-      //   }
-      //   return false;
-      // });
-      // $.fn.dataTable.ext.search.push(function (settings, data) {
-      //   if (
-      //     parseInt(data[8], 10) >= sValue[3][0] &&
-      //     sValue[3][1] >= parseInt(data[8], 10)
-      //   ) {
-      //     // 行の値と一致するか判定
-      //     return true;
-      //   }
-      //   return false;
-      // });
-
       $.fn.dataTable.ext.search.push(function (settings, data) {
         for (var i = 0; i < sValue.length; i++) {
           if (
