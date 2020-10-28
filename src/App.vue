@@ -42,7 +42,7 @@
 
       <!-- ナビバー、ハンバーガー実装はほぼコピペ -->
       <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="navbar-brand"></div>
+        <span class="navbar-brand"></span>
         <button
           class="navbar-toggler"
           type="button"
@@ -539,4 +539,10 @@ table.dataTable thead .sorting_desc {
   margin: 2px;
 }
 
+.navbar{
+  padding-left: 0px;
+}
+.navbar-brand{
+  margin: 0px;
+}
 </style>
