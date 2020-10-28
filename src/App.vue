@@ -39,28 +39,7 @@
           データ切り替え
         </button>
       </div>
-      <!-- <div class="row flex-nowrap" >
-        <div class="col-6 flex-nowrap" v-for="(value, index) in newCateButtons"
-          :key="index"
-        > -->
-      <!-- <button
-            type="button"
-            class="btn btn-outline-info col-1 flex-nowrap"
-            v-for="Value in cateButtons"
-            :key="Value"
-          >
-            {{Value}}
-          </button> -->
-      <!-- <button
-            type="button"
-            class="btn btn-outline-info col-1 flex-nowrap"
-            v-for="(nestValue, nestIndex) in value"
-            :key="nestIndex"
-          >
-            {{nestValue}}
-          </button>
-          </div>
-      </div> -->
+
       <nav class="navbar navbar-expand-sm navbar-light bg-light">
           <ul class="nav">
             <button
@@ -270,21 +249,6 @@ var cateButtons = [
 ];
 
 var newWpType = sepArrayGen(wpTypeL, 4);
-var newCateButtons = sepArrayGen(cateButtons, 12);
-
-// function newWpTypeGen() {
-//   var newTmpWpType = [];
-//   var tmpType = [];
-//   for (let i = 0; i < wpTypeL.length; i++) {
-//     tmpType.push(wpTypeL[i]);
-//     var tmp = i;
-//     if ((tmp + 1) % 4 == 0 || i == wpTypeL.length - 1) {
-//       newTmpWpType.push(tmpType);
-//       tmpType = [];
-//     }
-//   }
-//   return newTmpWpType;
-// }
 
 function sepArrayGen(ArrayObgect, sepNum) {
   var newArray = [];
@@ -374,7 +338,6 @@ export default {
       testData,
       db,
       startVisivle: true,
-      newCateButtons,
       cateButtons,
     };
   },
@@ -410,7 +373,6 @@ export default {
       this.dataTable
         .columns([6, 7, 8, 9, 10, 11, 12, 13, 14])
         .visible(startVisivle);
-      // this.dataTable.columns.adjust().draw( false );
     },
     resetSValue() {
       $.fn.dataTable.ext.search = [];
@@ -431,9 +393,6 @@ export default {
         return true;
       });
 
-      // console.log($.fn.dataTable.ext.search.length);
-      /* eslint-disable */
-      /* eslint-enable */
       this.dataTable.draw();
     },
   },
