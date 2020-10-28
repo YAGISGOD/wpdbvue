@@ -22,7 +22,7 @@ const columnsSettings = [
     {
         data: null,
         visible: false,
-        render: function (data) { return "" },// eslint-disable-line
+        render: function () { return "" },// eslint-disable-line
         width: "50px"
     },
     {

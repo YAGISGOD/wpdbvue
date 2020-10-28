@@ -21,18 +21,57 @@
         <div class="col-md-6 col-xl-1"></div>
         <button
           type="button"
-          class="btn btn btn-success col-md-6 col-xl-1"
+          class="btn btn-success col-md-6 col-xl-1"
           data-toggle="modal"
           data-target="#filter-content"
         >
           絞り込み
         </button>
         <div class="col-md-6 col-xl-1"></div>
-        <button type="button" v-on:click="startVisivle =! startVisivle; visivle(startVisivle);" class="btn btn btn-success col-md-6 col-xl-1">
+        <button
+          type="button"
+          v-on:click="
+            startVisivle = !startVisivle;
+            visivle(startVisivle);
+          "
+          class="btn btn-success col-md-6 col-xl-1"
+        >
           データ切り替え
         </button>
-
       </div>
+      <!-- <div class="row flex-nowrap" >
+        <div class="col-6 flex-nowrap" v-for="(value, index) in newCateButtons"
+          :key="index"
+        > -->
+      <!-- <button
+            type="button"
+            class="btn btn-outline-info col-1 flex-nowrap"
+            v-for="Value in cateButtons"
+            :key="Value"
+          >
+            {{Value}}
+          </button> -->
+      <!-- <button
+            type="button"
+            class="btn btn-outline-info col-1 flex-nowrap"
+            v-for="(nestValue, nestIndex) in value"
+            :key="nestIndex"
+          >
+            {{nestValue}}
+          </button>
+          </div>
+      </div> -->
+      <nav class="navbar navbar-expand-sm navbar-light bg-light">
+          <ul class="nav">
+            <button
+              class="btn btn-outline-info nav-item"
+              v-for="(Value,index) in cateButtons"
+              :key="index"
+            >
+              {{ Value }}
+            </button>
+          </ul>
+      </nav>
 
       <div class="modal" id="filter-content" tabindex="-1" role="dialog">
         <div id="modal-filter" class="modal-dialog modal-xl" role="document">
@@ -205,20 +244,60 @@ import db from "./wpdb.js";
 // テストデータ
 import testData from "./test.js"; // eslint-disable-line
 
-var newWpType = newWpTypeGen();
+var cateButtons = [
+  "全て",
+  "戦闘機",
+  "爆撃機",
+  "攻撃機",
+  "偵察機",
+  "陸戦\r\n陸攻",
+  "小口径",
+  "中口径",
+  "大口径",
+  "副砲",
+  "魚雷",
+  "電探",
+  "対潜",
+  "強化弾",
+  "機銃\r\n高射",
+  "機関\r\nバルジ",
+  "探照灯",
+  "偵察機",
+  "瑞雲\r\n回翼",
+  "大発",
+  "大型飛",
+  "その他",
+];
 
-function newWpTypeGen() {
-  var newTmpWpType = [];
+var newWpType = sepArrayGen(wpTypeL, 4);
+var newCateButtons = sepArrayGen(cateButtons, 12);
+
+// function newWpTypeGen() {
+//   var newTmpWpType = [];
+//   var tmpType = [];
+//   for (let i = 0; i < wpTypeL.length; i++) {
+//     tmpType.push(wpTypeL[i]);
+//     var tmp = i;
+//     if ((tmp + 1) % 4 == 0 || i == wpTypeL.length - 1) {
+//       newTmpWpType.push(tmpType);
+//       tmpType = [];
+//     }
+//   }
+//   return newTmpWpType;
+// }
+
+function sepArrayGen(ArrayObgect, sepNum) {
+  var newArray = [];
   var tmpType = [];
-  for (let i = 0; i < wpTypeL.length; i++) {
-    tmpType.push(wpTypeL[i]);
+  for (let i = 0; i < ArrayObgect.length; i++) {
+    tmpType.push(ArrayObgect[i]);
     var tmp = i;
-    if ((tmp + 1) % 4 == 0 || i == wpTypeL.length - 1) {
-      newTmpWpType.push(tmpType);
+    if ((tmp + 1) % sepNum == 0 || i == ArrayObgect.length - 1) {
+      newArray.push(tmpType);
       tmpType = [];
     }
   }
-  return newTmpWpType;
+  return newArray;
 }
 
 function dbMax(key) {
@@ -294,7 +373,9 @@ export default {
       sliderPro,
       testData,
       db,
-      startVisivle:true
+      startVisivle: true,
+      newCateButtons,
+      cateButtons,
     };
   },
   components: {
@@ -318,14 +399,17 @@ export default {
       select: true,
       columns: columnsSettings,
     });
+    this.dataTable.columns(1).search("^小口径主砲$", true).draw();
   },
   methods: {
     onChangeInput(selectChecked) {
       var searchType = "^" + selectChecked.join("$|^");
       this.dataTable.columns(1).search(searchType, true).draw();
     },
-    visivle(startVisivle){
-      this.dataTable.columns([6,7,8,9,10,11,12,13,14]).visible(startVisivle);
+    visivle(startVisivle) {
+      this.dataTable
+        .columns([6, 7, 8, 9, 10, 11, 12, 13, 14])
+        .visible(startVisivle);
       // this.dataTable.columns.adjust().draw( false );
     },
     resetSValue() {
@@ -420,5 +504,17 @@ table.dataTable thead .sorting_desc {
   white-space: nowrap;
   padding: 0px 7px;
   min-width: 20px;
+}
+.btn:not(:disabled):not(.disabled) {
+  font-size: 12px;
+}
+.wrap {
+  white-space: pre;
+}
+
+.btn-outline-info {
+  white-space: pre-line;
+  min-width: 60px;
+  min-height: 50px;
 }
 </style>
