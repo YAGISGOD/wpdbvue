@@ -16,6 +16,14 @@
           v-bind:class="[activetab === 2 ? 'active' : '']"
           class="toggleBtn btn btn-outline-primary col-md-6 col-xl-1"
         >
+          データ入力
+        </button>
+        <button
+          type="button"
+          v-on:click="activetab = 3"
+          v-bind:class="[activetab === 3 ? 'active' : '']"
+          class="toggleBtn btn btn-outline-primary col-md-6 col-xl-1"
+        >
           メモ
         </button>
         <div class="col-md-6 col-xl-1"></div>
@@ -27,11 +35,9 @@
         >
           絞り込み
         </button>
-        <div class="col-md-6 col-xl-1"></div>
-        <button type="button" v-on:click="startVisivle =! startVisivle; visivle(startVisivle);" class="btn btn btn-success col-md-6 col-xl-1">
-          データ切り替え
+        <button type="button" class="btn btn-warning col-xl-2 col-md-6 ml-auto">
+          テストデータ入力
         </button>
-
       </div>
 
       <div class="modal" id="filter-content" tabindex="-1" role="dialog">
@@ -115,9 +121,7 @@
                 :key="index"
               >
                 <span class="col-2 text-nowrap">{{ value.name }}</span>
-                <span class="col-1 text-right text-nowrap"
-                  >{{ sValue[index][0] }} Min</span
-                >
+                <span class="col-1 text-right text-nowrap">{{ sValue[index][0] }} Min</span>
                 <vue-slider
                   class="col-6"
                   ref="slider"
@@ -127,9 +131,7 @@
                   @drag-end="sliderChenged(sValue)"
                   :tooltip="'none'"
                 ></vue-slider>
-                <span class="col-2 text-nowrap"
-                  >{{ sValue[index][1] }} Max</span
-                >
+                <span class="col-2 text-nowrap">{{ sValue[index][1] }} Max</span>
               </div>
               <div class="row"></div>
               <button
@@ -160,6 +162,14 @@
         </table>
       </div>
       <div id="page2" class="pages tabcontent" v-show="activetab === 2">
+        <hr />
+        艦隊分析ページの装備用コードを下のテキストフィールドに入力して反映を押す<br />
+        <button type="button" id="putBtn" class="btn btn-outline-primary">
+          反映</button
+        ><br /><br />
+        <textarea name="data" id="jsonData" cols="100" rows="20"></textarea>
+      </div>
+      <div id="page3" class="pages tabcontent" v-show="activetab === 3">
         <p>
           ・改修可能装備の絞り込み(Veuでは未実装)<br />
           ・ステータス絞り込み（Veuでは未実装）<br />
@@ -292,9 +302,6 @@ export default {
       ths,
       sValue: newsValue,
       sliderPro,
-      testData,
-      db,
-      startVisivle:true
     };
   },
   components: {
@@ -314,7 +321,7 @@ export default {
       data: JSON.parse(JSON.stringify(testData)),
       responsive: true,
       lengthChange: false,
-      displayLength: 500,
+      displayLength: 50,
       select: true,
       columns: columnsSettings,
     });
@@ -324,14 +331,10 @@ export default {
       var searchType = "^" + selectChecked.join("$|^");
       this.dataTable.columns(1).search(searchType, true).draw();
     },
-    visivle(startVisivle){
-      this.dataTable.columns([6,7,8,9,10,11,12,13,14]).visible(startVisivle);
-      // this.dataTable.columns.adjust().draw( false );
-    },
     resetSValue() {
       $.fn.dataTable.ext.search = [];
       this.dataTable.draw();
-      return newsValueGen();
+      return newsValueGen()
     },
     sliderChenged(sValue) {
       $.fn.dataTable.ext.search = [];
@@ -412,13 +415,13 @@ table.dataTable thead .sorting_desc {
   background-repeat: no-repeat;
   background-position: center right;
 }
-.modal-footer > * {
-  font-size: 15px;
+.modal-footer>* {
+    font-size: 15px;
 }
 .vue-slider-dot-tooltip-inner {
-  font-size: 10px;
-  white-space: nowrap;
-  padding: 0px 7px;
-  min-width: 20px;
+    font-size: 10px;
+    white-space: nowrap;
+    padding: 0px 7px;
+    min-width: 20px;
 }
 </style>

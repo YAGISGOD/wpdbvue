@@ -16,6 +16,7 @@ const columnsSettings = [
     },
     {
         data: "api_level",
+        visible: false,
         width: "50px"
     },
     {
