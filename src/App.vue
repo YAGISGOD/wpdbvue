@@ -40,16 +40,34 @@
         </button>
       </div>
 
-      <nav class="navbar navbar-expand-sm navbar-light bg-light">
+      <!-- ナビバー、ハンバーガー実装はほぼコピペ -->
+      <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="navbar-brand"></div>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarText"
+          aria-controls="navbarText"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarText">
           <ul class="nav">
+            <!-- v-forした配列は直接書き換えできない、$setやsplice()を使う（関数内でも使わないとダメ） -->
             <button
               class="btn btn-outline-info nav-item"
-              v-for="(Value,index) in cateButtons"
+              v-for="(Value, index) in cateButtons"
               :key="index"
+              v-on:click="activeCate = activeCateChenge(activeCate, index)"
+              v-bind:class="[activeCate[index] === true ? 'active' : '']"
             >
               {{ Value }}
             </button>
           </ul>
+        </div>
       </nav>
 
       <div class="modal" id="filter-content" tabindex="-1" role="dialog">
@@ -163,6 +181,7 @@
         </div>
       </div>
 
+
       <div id="page1" class="pages tabcontent" v-show="activetab === 1">
         <table
           id="tbl1"
@@ -223,6 +242,7 @@ import db from "./wpdb.js";
 // テストデータ
 import testData from "./test.js"; // eslint-disable-line
 
+// カテゴリボタン定義、外部ファイルへ（カテゴリごとの情報を持ったオブジェクトになる予定）
 var cateButtons = [
   "全て",
   "戦闘機",
@@ -248,8 +268,25 @@ var cateButtons = [
   "その他",
 ];
 
+// カテゴリボタン有効情報配列
+var activeCate = activeCateState();
+
+function activeCateState() {
+  var array = [];
+  for (let i = 0; i < cateButtons.length; i++) {
+    if (i == 6) {
+      array[i] = true;
+    } else {
+      array[i] = false;
+    }
+  }
+  return array;
+}
+
+// 絞り込み用のカテゴリ配列を区切ったもの
 var newWpType = sepArrayGen(wpTypeL, 4);
 
+// 配列を区切る関数、使いまわし出来そう
 function sepArrayGen(ArrayObgect, sepNum) {
   var newArray = [];
   var tmpType = [];
@@ -264,6 +301,7 @@ function sepArrayGen(ArrayObgect, sepNum) {
   return newArray;
 }
 
+//オブジェクトから最大最小を取る関数、見た目もう少しマシにしたい
 function dbMax(key) {
   return Math.max.apply(
     null,
@@ -280,6 +318,8 @@ function dbMin(key) {
     })
   );
 }
+
+// スライダーの定義オブジェクト、半自動生成（多分もう少し良く出来る
 var sliderPro = [
   { col: 3, name: "改修Lv", min: 0, max: 10 },
   { col: 6, name: "火力", min: dbMin("fire"), max: dbMax("fire") },
@@ -293,6 +333,7 @@ var sliderPro = [
   { col: 14, name: "爆装", min: dbMin("bombing"), max: dbMax("bombing") },
 ];
 
+// スライダーの初期値[配列]を生成する
 function newsValueGen() {
   var sValueTmp = [];
   for (var i = 0; i < sliderPro.length; i++) {
@@ -302,6 +343,7 @@ function newsValueGen() {
 }
 var newsValue = newsValueGen();
 
+// テーブルのヘッダー定義配列
 var ths = [
   "ID",
   "装備種別",
@@ -326,7 +368,6 @@ export default {
   data() {
     return {
       columnsSet,
-      show_contents: [],
       dataTable: null,
       activetab: 1,
       wpTypeL,
@@ -339,6 +380,7 @@ export default {
       db,
       startVisivle: true,
       cateButtons,
+      activeCate,
     };
   },
   components: {
@@ -354,6 +396,7 @@ export default {
       },
     });
 
+    // データテーブル反映
     this.dataTable = window.$("#tbl1").DataTable({
       data: JSON.parse(JSON.stringify(testData)),
       responsive: true,
@@ -362,23 +405,41 @@ export default {
       select: true,
       columns: columnsSettings,
     });
+    // 初期フィルタ
     this.dataTable.columns(1).search("^小口径主砲$", true).draw();
   },
   methods: {
+    // カテゴリフィルタ
     onChangeInput(selectChecked) {
       var searchType = "^" + selectChecked.join("$|^");
       this.dataTable.columns(1).search(searchType, true).draw();
     },
+    // 列表示切替
     visivle(startVisivle) {
       this.dataTable
         .columns([6, 7, 8, 9, 10, 11, 12, 13, 14])
         .visible(startVisivle);
     },
+    // カテゴリフィルタボタンアクティブ切り替え
+    activeCateChenge(array, idx) {
+      var tmpbool;
+      if (idx == 0) {
+        tmpbool = !array[0];
+        for (var i = 0; i < array.length; i++) {
+          array.splice(i, 1, tmpbool);
+        }
+      } else {
+        array.splice(idx, 1, !array[idx]);
+      }
+      return array;
+    },
+    // スライダーリセット
     resetSValue() {
       $.fn.dataTable.ext.search = [];
       this.dataTable.draw();
       return newsValueGen();
     },
+    // スライダー変更
     sliderChenged(sValue) {
       $.fn.dataTable.ext.search = [];
       $.fn.dataTable.ext.search.push(function (settings, data) {
@@ -467,13 +528,15 @@ table.dataTable thead .sorting_desc {
 .btn:not(:disabled):not(.disabled) {
   font-size: 12px;
 }
-.wrap {
-  white-space: pre;
-}
 
 .btn-outline-info {
+  /* 改行出すために入れたところ */
   white-space: pre-line;
-  min-width: 60px;
-  min-height: 50px;
+  width: 60px;
+  height: 50px;
+  max-width: 60px;
+  max-height: 50px;
+  margin: 2px;
 }
+
 </style>
