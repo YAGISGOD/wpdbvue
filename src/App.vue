@@ -59,12 +59,12 @@
             <!-- v-forした配列は直接書き換えできない、$setやsplice()を使う（関数内でも使わないとダメ） -->
             <button
               class="btn btn-outline-info nav-item"
-              v-for="(Value, index) in cateButtons"
+              v-for="(Value, index) in cate"
               :key="index"
-              v-on:click="activeCate = activeCateChenge(activeCate, index)"
-              v-bind:class="[activeCate[index] === true ? 'active' : '']"
+              v-on:click="cate = activeCateChenge(cate, index)"
+              v-bind:class="[Value.state === true ? 'active' : '']"
             >
-              {{ Value }}
+              {{ Value.catename }}
             </button>
           </ul>
         </div>
@@ -73,77 +73,8 @@
       <div class="modal" id="filter-content" tabindex="-1" role="dialog">
         <div id="modal-filter" class="modal-dialog modal-xl" role="document">
           <div class="modal-content">
-            <div class="modal-header">
-              <div class="row col-12">
-                <li class="list-inline-item col-12 col-xl-7">
-                  <span class="dropdown-item">選択してください</span>
-                </li>
-                <button
-                  type="button"
-                  v-on:click="
-                    selectChecked = wpTypeL.map((obj) => obj.wpTypeCateName);
-                    onChangeInput(selectChecked);
-                  "
-                  class="btn btn-outline-primary col-12 col-xl-2 false"
-                >
-                  全チェック
-                </button>
-                <button
-                  type="button"
-                  v-on:click="
-                    selectChecked = [];
-                    onChangeInput(selectChecked);
-                  "
-                  class="btn btn-outline-primary col-12 col-xl-2"
-                >
-                  チェックを外す
-                </button>
-              </div>
-            </div>
-            <div id="filter-body">
-              <div class="row col-12">
-                <button
-                  type="button"
-                  class="btn btn-outline-primary cateToggleBtn col-6"
-                >
-                  大カテゴリ(未実装)
-                </button>
-                <button
-                  type="button"
-                  class="btn btn-outline-primary cateToggleBtn col-6"
-                >
-                  小カテゴリ
-                </button>
-              </div>
-              <div id="catePage1" class="row col-12 catePages">
-                <div
-                  class="row col-12"
-                  v-for="(value, index) in newWpType"
-                  :key="index"
-                >
-                  <div
-                    class="dropdown-item col-md-6 col-xl-3"
-                    style="vertical-align: middle !important"
-                    v-for="(nestValue, nestIndex) in value"
-                    :key="nestIndex"
-                  >
-                    <div class="row col-12">
-                      <div class="row col-12">
-                        <input
-                          type="checkbox"
-                          name="wpTypeLCheck"
-                          :value="nestValue.wpTypeCateName"
-                          class="col-2"
-                          v-model="selectChecked"
-                          @change="onChangeInput(selectChecked)"
-                        />
-                        <div class="col-8">{{ nestValue.wpTypeCateName }}</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <div class="modal-header"></div>
+            <div id="filter-body"></div>
             <div class="modal-footer">
               <div
                 class="row col-12 h-100"
@@ -180,7 +111,6 @@
           </div>
         </div>
       </div>
-
 
       <div id="page1" class="pages tabcontent" v-show="activetab === 1">
         <table
@@ -234,6 +164,7 @@ import "datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css";
 // モジュール
 import columnsSet from "./columnsSettings.js"; // eslint-disable-line
 import wpTypeL from "./wpTypeL.js"; // eslint-disable-line
+import cate from "./cate.js"; // eslint-disable-line
 //
 import VueSlider from "vue-slider-component";
 import "vue-slider-component/theme/default.css";
@@ -241,47 +172,6 @@ import db from "./wpdb.js";
 
 // テストデータ
 import testData from "./test.js"; // eslint-disable-line
-
-// カテゴリボタン定義、外部ファイルへ（カテゴリごとの情報を持ったオブジェクトになる予定）
-var cateButtons = [
-  "全て",
-  "戦闘機",
-  "爆撃機",
-  "攻撃機",
-  "偵察機",
-  "陸戦\r\n陸攻",
-  "小口径",
-  "中口径",
-  "大口径",
-  "副砲",
-  "魚雷",
-  "電探",
-  "対潜",
-  "強化弾",
-  "機銃\r\n高射",
-  "機関\r\nバルジ",
-  "探照灯",
-  "偵察機",
-  "瑞雲\r\n回翼",
-  "大発",
-  "大型飛",
-  "その他",
-];
-
-// カテゴリボタン有効情報配列
-var activeCate = activeCateState();
-
-function activeCateState() {
-  var array = [];
-  for (let i = 0; i < cateButtons.length; i++) {
-    if (i == 6) {
-      array[i] = true;
-    } else {
-      array[i] = false;
-    }
-  }
-  return array;
-}
 
 // 絞り込み用のカテゴリ配列を区切ったもの
 var newWpType = sepArrayGen(wpTypeL, 4);
@@ -379,8 +269,7 @@ export default {
       testData,
       db,
       startVisivle: true,
-      cateButtons,
-      activeCate,
+      cate,
     };
   },
   components: {
@@ -406,7 +295,16 @@ export default {
       columns: columnsSettings,
     });
     // 初期フィルタ
-    this.dataTable.columns(1).search("^小口径主砲$", true).draw();
+    var search = [];
+    cate
+      .filter((v) => v.state === true)
+      .map((v) => v.typename)
+      .forEach(function (value) {
+        search = search.concat(value);
+      });
+    var searchType = "^" + search.join("$|^");
+    this.dataTable.columns(1).search(searchType, true).draw();
+    // this.dataTable.columns(1).search("^小口径主砲$", true).draw();
   },
   methods: {
     // カテゴリフィルタ
@@ -421,17 +319,40 @@ export default {
         .visible(startVisivle);
     },
     // カテゴリフィルタボタンアクティブ切り替え
-    activeCateChenge(array, idx) {
+    activeCateChenge(obj, idx) {
       var tmpbool;
+      var searchType;
+
+      // 全てボタンの動作
       if (idx == 0) {
-        tmpbool = !array[0];
-        for (var i = 0; i < array.length; i++) {
-          array.splice(i, 1, tmpbool);
-        }
+        //全てのボタン状態一斉変更
+        tmpbool = !obj[0].state;
+        obj.forEach((v, i) => (obj[i].state = tmpbool));
+        // 検索キーワード設定
+        searchType = tmpbool === true ? "" : "null";
+        // 個別ボタンの動作
       } else {
-        array.splice(idx, 1, !array[idx]);
+        //ボタン状態変更
+        obj[idx].state = !obj[idx].state;
+        // 検索キーワード設定
+        var search = [];
+        obj
+          .filter((v) => v.state === true)
+          .map((v) => v.typename)
+          .forEach(function (value) {
+            search = search.concat(value);
+          });
+        searchType = search.length === 0 ? "null" : "^" + search.join("$|^");
+
+        // 先頭以外のすべてのボタンがtrueの場合全てボタンもtrueにする
+        obj[0].state =
+          obj.filter((v, i) => i != 0 && v.state === true).length ===
+          obj.length - 1
+            ? true
+            : false;
       }
-      return array;
+      this.dataTable.columns(1).search(searchType, true).draw();
+      return obj;
     },
     // スライダーリセット
     resetSValue() {
@@ -539,10 +460,10 @@ table.dataTable thead .sorting_desc {
   margin: 2px;
 }
 
-.navbar{
+.navbar {
   padding-left: 0px;
 }
-.navbar-brand{
+.navbar-brand {
   margin: 0px;
 }
 </style>
