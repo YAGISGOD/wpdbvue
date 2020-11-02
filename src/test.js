@@ -1554,6 +1554,22 @@
 	{
 		"api_slotitem_id":"392",
 		"api_level":"0"
+	},
+	{
+		"api_slotitem_id":"393",
+		"api_level":"0"
+	},
+	{
+		"api_slotitem_id":"394",
+		"api_level":"0"
+	},
+	{
+		"api_slotitem_id":"395",
+		"api_level":"0"
+	},
+	{
+		"api_slotitem_id":"396",
+		"api_level":"0"
 	}
 ];
 export default testData
