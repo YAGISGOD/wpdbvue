@@ -1,4 +1,4 @@
-﻿const db =[
+﻿[
 	{
 		"wpId":"1",
 		"typeName":"小口径主砲",
@@ -7840,4 +7840,3 @@
 		"wikiName":"深山改"
 	}
 ]
-export default db

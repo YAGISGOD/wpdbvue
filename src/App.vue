@@ -246,12 +246,23 @@ var ths = [
   "対空",
   "装甲",
   "対潜",
+  "航空戦",
+  "雷撃",
+  "火力(非空母)",
+  "火力(空母)",
+  "火力(夜戦)",
+  "夜間航空攻撃",
+  "夜戦(対地)",
+  "制空",
   "回避",
   "索敵",
   "命中",
   "爆装",
   "射程",
   "行動範囲",
+  "改修",
+  "ボーナス",
+  "wiki",
 ];
 
 export default {
@@ -314,9 +325,10 @@ export default {
     },
     // 列表示切替
     visivle(startVisivle) {
+      this.dataTable.columns([6, 7, 8, 9, 10, 22]).visible(startVisivle);
       this.dataTable
-        .columns([6, 7, 8, 9, 10, 11, 12, 13, 14])
-        .visible(startVisivle);
+        .columns([11, 12, 13, 14, 15, 16, 17, 18])
+        .visible(!startVisivle);
     },
     // カテゴリフィルタボタンアクティブ切り替え
     activeCateChenge(obj, idx) {

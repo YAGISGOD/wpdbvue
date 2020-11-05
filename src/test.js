@@ -1332,10 +1332,6 @@
 		"api_level":"0"
 	},
 	{
-		"api_slotitem_id":"337",
-		"api_level":"0"
-	},
-	{
 		"api_slotitem_id":"338",
 		"api_level":"0"
 	},
